@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./apps/data-service/hono
+    container_name: chaykov-saas-backend
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build: ./apps/user-application/rrv7
+    container_name: chaykov-saas-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

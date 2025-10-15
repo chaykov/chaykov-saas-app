@@ -1,0 +1,52 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Tomasz",
+      "age": 30,
+      "country": "Poland",
+      "bio": "I like programming",
+      "hobbies": ["Astrology", "Music", "Movies"]
+    },
+    {
+      "id": 2,
+      "name": "Adam",
+      "age": 25,
+      "country": "Germany",
+      "bio": "I like programming and building my own car",
+      "hobbies": ["Car", "Money", "Pizza", "Pepsi"]
+    },
+    {
+      "id": 3,
+      "name": "Sonia",
+      "age": 34,
+      "country": "France",
+      "bio": "I like fashion",
+      "hobbies": ["Model", "Fashion"]
+    },
+    {
+      "id": 4,
+      "name": "Adam",
+      "age": 23,
+      "country": "Poland",
+      "bio": "I study law",
+      "hobbies": ["Law", "Music"]
+    },
+    {
+      "id": 5,
+      "name": "Peter",
+      "age": 25,
+      "country": "Hungary",
+      "bio": "I want to be a model",
+      "hobbies": ["Bike", "Pizza", "Model"]
+    },
+    {
+      "id": 6,
+      "name": "Olive",
+      "age": 28,
+      "country": "France",
+      "bio": "I like fashion",
+      "hobbies": ["Model", "Fashion"]
+    }
+  ]
+}
