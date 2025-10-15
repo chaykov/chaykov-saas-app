@@ -61,7 +61,7 @@ export default function UsersPage() {
 
     <div className="flex flex-col h-full space-y-2">
       {/* Section filter */}
-      <div className="bg-red-200 p-2">section filter</div>
+      <div className="bg-red-200 p-2">section filter test</div>
 
       <div className="flex flex-1 space-x-2">
         {/* Section main users on the left */}

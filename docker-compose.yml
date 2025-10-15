@@ -1,12 +1,12 @@
 services:
   backend:
-    build: ./apps/data-service/hono
+    image: ghcr.io/chaykov/chaykov-backend:latest
     container_name: chaykov-saas-backend
     ports:
       - "3000:3000"
 
   frontend:
-    build: ./apps/user-application/rrv7
+    image: ghcr.io/chaykov/chaykov-frontend:latest
     container_name: chaykov-saas-frontend
     ports:
       - "5173:80"
