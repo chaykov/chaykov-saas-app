@@ -2,14 +2,13 @@ import React from 'react';
 import { createBrowserRouter } from 'react-router';
 
 import { protectedLoader } from '../hooks/useProtectedLoader';
-import { loadAllUsers } from '@/services/loaders/loadAllUsers';
-import { loadUserById } from '@/services/loaders';
+import { loadAllUsers, loadUserById } from '@/services/loaders';
 
 // Layout
-const AppLayout = React.lazy(() => import('@/components/layout/app-layout'));
+import AppLayout from '@/components/layout/app-layout';
+import LandingPage from './landing-page';
 
 // Pages
-const LandingPage = React.lazy(() => import('@/routes/landing-page'));
 const AppPage = React.lazy(() => import('@/routes/app/app-page'));
 const ForumPage = React.lazy(() => import('@/routes/app/forum-page'));
 const ProfilePage = React.lazy(() => import('@/routes/app/profile-page'));
@@ -69,6 +68,17 @@ const router = createBrowserRouter([
         Component: UsersPage,
         loader: loadAllUsers,
         children: [
+          {
+            path: '',
+            element: React.createElement(
+              'div',
+              {
+                className:
+                  'flex border rounded-md items-center justify-center h-full',
+              },
+              'Select a user',
+            ),
+          },
           {
             path: ':id',
             Component: UserDetail,

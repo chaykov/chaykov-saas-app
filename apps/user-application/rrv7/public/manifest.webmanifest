@@ -1,0 +1,11 @@
+{
+  "name": "PolyTalko",
+  "short_name": "PolyTalko",
+  "description": "PolyTalko is a modern social platform to connect with people, share updates, and explore new connections effortlessly.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "lang": "en"
+}

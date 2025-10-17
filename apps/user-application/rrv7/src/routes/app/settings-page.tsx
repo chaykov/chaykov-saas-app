@@ -1,3 +1,8 @@
 export default function SettingsPage() {
-  return <h1>Hello SettingsPage</h1>;
+  return (
+    <div>
+      <title>PolyTalko - Settings</title>
+      <h1>Hello SettingsPage</h1>
+    </div>
+  );
 }

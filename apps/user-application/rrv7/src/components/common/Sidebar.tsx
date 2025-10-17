@@ -1,6 +1,6 @@
-import { Separator } from '@/components/ui/separator';
-import React from 'react';
 import { NavLink } from 'react-router';
+
+import { Separator } from '@/components/ui/separator';
 import Reordering from './Reordering';
 
 export default function Sidebar() {
@@ -38,24 +38,27 @@ export default function Sidebar() {
       </div>
       <Separator className="my-4" />
       <nav className="flex flex-col space-y-2">
-        {links.map((link) => (
-          <React.Fragment key={link.href}>
+        {links.map((link, index) => (
+          <div key={link.href}>
             <NavLink
               to={link.href}
               end={link.href === '/app'}
+              aria-label={`You see ${link.href} is ${link.name}`}
               className={({ isActive }) =>
                 isActive
-                  ? 'text-blue-400 font-medium border-l-2 border-blue-400 pl-2'
-                  : 'text-gray-600/90 hover:text-black'
+                  ? 'text-indigo-600 font-medium border-l-2 border-indigo-400 pl-2 block'
+                  : 'text-slate-600 hover:text-indigo-600 block'
               }
             >
-              {link.name}
+              <span className="block">{link.name}</span>
+              <span className="text-xs text-gray-600/90 block mt-0.5">
+                {link.description}
+              </span>
             </NavLink>
-            <span className="text-xs flex text-gray-600/90 select-none">
-              {link.description}
-            </span>
-            <Separator orientation="horizontal" className="bg-gray-200/40" />
-          </React.Fragment>
+            {index < links.length - 1 && (
+              <Separator orientation="horizontal" className="bg-gray-200/40" />
+            )}
+          </div>
         ))}
       </nav>
     </>

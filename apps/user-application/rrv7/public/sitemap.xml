@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://polytalko.com/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://polytalko.com/auth/login</loc>
+  </url>
+  <url>
+    <loc>https://polytalko.com/auth/register</loc>
+  </url>
+  <url>
+    <loc>https://polytalko.com/app</loc>
+  </url>
+  <url>
+    <loc>https://polytalko.com/app/forum</loc>
+  </url>
+  <url>
+    <loc>https://polytalko.com/app/users</loc>
+  </url>
+  <url>
+    <loc>https://polytalko.com/app/settings</loc>
+  </url>
+</urlset>

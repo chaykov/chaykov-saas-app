@@ -1,3 +1,8 @@
 export default function AppPage() {
-  return <h1>Hello AppPage</h1>;
+  return (
+    <div>
+      <title>PolyTalko - App</title>
+      <h1>Hello AppPage</h1>
+    </div>
+  );
 }

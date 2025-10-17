@@ -1,3 +1,8 @@
 export default function ForumPage() {
-  return <h1>Hello ForumPage</h1>;
+  return (
+    <div>
+      <title>PolyTalko - Forum</title>
+      <h1>Hello ForumPage</h1>
+    </div>
+  );
 }

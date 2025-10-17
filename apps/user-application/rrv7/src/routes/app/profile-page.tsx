@@ -1,3 +1,8 @@
 export default function ProfilePage() {
-  return <h1>Hello ProfilePage</h1>;
+  return (
+    <div>
+      <title>PolyTalko - Profile</title>
+      <h1>Hello ProfilePage</h1>
+    </div>
+  );
 }

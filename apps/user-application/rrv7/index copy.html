@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Podstawowe meta -->
+    <title>PolyTalko</title>
+    <meta
+      name="description"
+      content="PolyTalko is a modern social platform to connect with people, share updates, and explore new connections effortlessly."
+    />
+    <meta
+      name="keywords"
+      content="PolyTalko, social network, connect, chat, community, users, profiles"
+    />
+    <meta name="author" content="PolyTalko Team" />
+
+    <!-- ✅ Open Graph / Facebook -->
+    <meta property="og:site_name" content="PolyTalko" />
+    <meta
+      property="og:title"
+      content="PolyTalko — Social App for Connecting People"
+    />
+    <meta
+      property="og:description"
+      content="Join PolyTalko to connect with friends, share updates, and explore new social connections."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://polytalko.com" />
+    <meta property="og:image" content="https://polytalko.com/og-image.png" />
+
+    <!-- ✅ Twitter meta -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@PolyTalko" />
+    <meta
+      name="twitter:title"
+      content="PolyTalko — Social App for Connecting People"
+    />
+    <meta
+      name="twitter:description"
+      content="Connect, share, and interact on PolyTalko — the modern social platform for meaningful connections."
+    />
+    <meta
+      name="twitter:image"
+      content="https://polytalko.com/twitter-image.png"
+    />
+
+    <!-- ✅ Ikony -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- ✅ Preconnect / DNS Prefetch (dla wydajności) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Jeśli używasz Google Fonts -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"> -->
+    <link
+      rel="preload"
+      href="/fonts/Roboto-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Roboto-Bold.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- ✅ Structured data (Schema.org) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "PolyTalko",
+        "url": "https://polytalko.com",
+        "description": "A modern social platform to connect with people, share updates, and explore new connections effortlessly.",
+        "applicationCategory": "SocialNetworkingApplication",
+        "operatingSystem": "All"
+      }
+    </script>
+
+    <link rel="modulepreload" href="./app-layout.js" />
+    <link rel="modulepreload" href="./landing-page.js" />
+  </head>
+
+  <body>
+    <!-- <noscript> You need to enable JavaScript to run PolyTalko. </noscript> -->
+    <div id="root"></div>
+
+    <!-- ✅ Główny punkt wejścia Vite -->
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>
