@@ -31,15 +31,7 @@ export default function UserList() {
               }
             >
               {/* Avatar placeholder - w przyszłości <img src={user.avatar} /> */}
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  fetchPriority="high"
-                  loading="lazy"
-                  alt={`${user.name} avatar`}
-                  className="size-12 rounded-full object-cover shrink-0"
-                />
-              ) : (
+              {user.name && (
                 <div
                   className="size-12 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-600 flex items-center justify-center text-white text-sm font-semibold"
                   aria-label={user.name}

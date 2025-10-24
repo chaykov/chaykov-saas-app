@@ -1,12 +1,12 @@
 import React from 'react';
 import { createBrowserRouter } from 'react-router';
 
-import { protectedLoader } from '../hooks/useProtectedLoader';
+import { protectedLoader } from './hooks/useProtectedLoader';
 import { loadAllUsers, loadUserById } from '@/services/loaders';
 
 // Layout
 import AppLayout from '@/components/layout/app-layout';
-import LandingPage from './landing-page';
+import LandingPage from './routes/landing-page';
 
 // Pages
 const AppPage = React.lazy(() => import('@/routes/app/app-page'));
