@@ -23,12 +23,12 @@ A VPS is like renting a computer in the cloud that runs 24/7. You'll install Ubu
 
 I'll use **DigitalOcean** for this guide (beginner-friendly, good documentation):
 
-| Provider | Price | Specs | Best For |
-|----------|-------|-------|----------|
-| **DigitalOcean** | $6/month | 1GB RAM, 1 CPU | Beginners (easiest) |
-| **Vultr** | $6/month | 1GB RAM, 1 CPU | Good alternative |
-| **Linode** | $5/month | 1GB RAM, 1 CPU | Great value |
-| **AWS Lightsail** | $5/month | 1GB RAM, 1 CPU | If you use AWS |
+| Provider          | Price    | Specs          | Best For            |
+| ----------------- | -------- | -------------- | ------------------- |
+| **DigitalOcean**  | $6/month | 1GB RAM, 1 CPU | Beginners (easiest) |
+| **Vultr**         | $6/month | 1GB RAM, 1 CPU | Good alternative    |
+| **Linode**        | $5/month | 1GB RAM, 1 CPU | Great value         |
+| **AWS Lightsail** | $5/month | 1GB RAM, 1 CPU | If you use AWS      |
 
 **Recommendation**: Start with DigitalOcean's $12/month plan (2GB RAM) for better performance.
 
@@ -96,6 +96,7 @@ Copy the entire output (starts with `ssh-ed25519 ...`).
 ### 2.3 Add SSH Key to DigitalOcean
 
 **If you already created the droplet:**
+
 1. Go to DigitalOcean Dashboard
 2. Click your droplet name
 3. Click **"Console"** (opens browser terminal)
@@ -116,6 +117,7 @@ chmod 600 ~/.ssh/authorized_keys
 ```
 
 **If you haven't created droplet yet:**
+
 1. Go to Settings → Security → SSH Keys
 2. Click **"Add SSH Key"**
 3. Paste your public key
@@ -203,6 +205,7 @@ sudo ufw status
 ```
 
 You should see:
+
 ```
 Status: active
 
@@ -289,6 +292,7 @@ git --version
 ### 5.2 Clone Your Repository
 
 **For Public Repository:**
+
 ```bash
 # Navigate to home directory
 cd ~
@@ -304,6 +308,7 @@ ls -la
 ```
 
 **For Private Repository:**
+
 ```bash
 # You'll need to authenticate
 
@@ -361,6 +366,7 @@ CORS_ORIGIN=http://YOUR_IP_OR_DOMAIN
 ```
 
 **Important**:
+
 - Change `DB_PASSWORD` and `POSTGRES_PASSWORD` to a strong password
 - Replace `YOUR_IP_OR_DOMAIN` with your VPS IP address (e.g., `http://165.227.123.456`)
 
@@ -377,6 +383,7 @@ nano .env
 ```
 
 Add:
+
 ```env
 VITE_API_URL=http://YOUR_IP_OR_DOMAIN:3001/api
 ```
@@ -419,7 +426,8 @@ docker compose logs -f
 
 ```bash
 # Run migrations to create tables
-docker compose exec backend pnpm --filter @saas/data-service drizzle:migrate
+# docker compose exec backend pnpm --filter @saas/data-service drizzle:migrate
+docker compose exec backend pnpm --filter express drizzle:migrate
 
 # You should see: "Successfully migrated database"
 ```
@@ -428,7 +436,9 @@ docker compose exec backend pnpm --filter @saas/data-service drizzle:migrate
 
 ```bash
 # Connect to database
-docker compose exec db psql -U postgres -d saas_db
+# docker compose exec db psql -U postgres -d saas_db
+docker compose exec postgres psql -U postgres -d chaykov_saas
+
 
 # Create a test user (paste these SQL commands)
 INSERT INTO users (username, email, password, bio)
@@ -469,6 +479,7 @@ curl http://localhost:3001/health
 ### 8.2 Test Frontend
 
 Open your browser and go to:
+
 ```
 http://YOUR_VPS_IP
 ```
@@ -484,6 +495,7 @@ Example: `http://165.227.123.456`
 ### 9.1 Purchase Domain
 
 Go to domain registrar:
+
 - **Namecheap**: https://www.namecheap.com (~$10/year)
 - **Google Domains**: https://domains.google
 - **Cloudflare**: https://www.cloudflare.com/products/registrar/
@@ -495,6 +507,7 @@ Purchase a domain (e.g., `chaykov-saas.com`)
 In your domain registrar's DNS settings:
 
 1. Add **A Record**:
+
    - **Type**: A
    - **Name**: @ (or leave empty)
    - **Value**: YOUR_VPS_IP
@@ -564,7 +577,7 @@ Paste this (replace `your-domain.com` with your actual domain):
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com www.your-domain.com;
+    server_name polytalko.com www.polytalko.com;
 
     # Frontend (React)
     location / {
@@ -610,12 +623,14 @@ nano docker-compose.yml
 ```
 
 Find the frontend service and change port to:
+
 ```yaml
-    ports:
-      - "3000:80"  # Changed from "80:80"
+ports:
+  - "3000:80" # Changed from "80:80"
 ```
 
 **Save** and restart:
+
 ```bash
 docker compose up -d frontend
 ```
@@ -624,7 +639,7 @@ docker compose up -d frontend
 
 ```bash
 # Get SSL certificate (replace with your email and domain)
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+sudo certbot --nginx -d polytalko.com -d www.polytalko.com
 
 # Follow prompts:
 # 1. Enter email
@@ -793,6 +808,7 @@ docker compose up -d
 ## Troubleshooting
 
 ### Issue: Can't connect to VPS
+
 ```bash
 # Check if VPS is running in DigitalOcean dashboard
 # Try ping:
@@ -803,6 +819,7 @@ ssh -v root@YOUR_IP
 ```
 
 ### Issue: Docker containers not starting
+
 ```bash
 # Check logs
 docker compose logs
@@ -816,6 +833,7 @@ docker compose up -d
 ```
 
 ### Issue: Website shows "Bad Gateway"
+
 ```bash
 # Check if backend is running
 docker compose ps
@@ -828,6 +846,7 @@ docker compose restart backend
 ```
 
 ### Issue: Database connection failed
+
 ```bash
 # Check if database is running
 docker compose ps db
@@ -840,6 +859,7 @@ cat apps/data-service/express/.env
 ```
 
 ### Issue: Out of memory
+
 ```bash
 # Check memory
 free -h
@@ -856,12 +876,12 @@ docker compose restart
 
 Monthly costs for running your SaaS:
 
-| Service | Cost | Notes |
-|---------|------|-------|
-| VPS (2GB RAM) | $12/month | DigitalOcean |
-| Domain | $1/month | ~$10/year |
-| SSL Certificate | FREE | Let's Encrypt |
-| **Total** | **~$13/month** | |
+| Service         | Cost           | Notes         |
+| --------------- | -------------- | ------------- |
+| VPS (2GB RAM)   | $12/month      | DigitalOcean  |
+| Domain          | $1/month       | ~$10/year     |
+| SSL Certificate | FREE           | Let's Encrypt |
+| **Total**       | **~$13/month** |               |
 
 Yearly: ~$156/year
 
@@ -872,6 +892,7 @@ Yearly: ~$156/year
 ✅ Your application is now live on the internet!
 
 **What to do next:**
+
 1. 🔐 Set up proper authentication (JWT tokens, sessions)
 2. 📊 Add monitoring (e.g., Sentry for error tracking)
 3. 📈 Set up analytics (Google Analytics, Plausible)
@@ -914,6 +935,7 @@ htop
 🎉 **Congratulations!** You've successfully deployed your SaaS application to production!
 
 **Need help?**
+
 - DigitalOcean Community: https://www.digitalocean.com/community
 - Docker Documentation: https://docs.docker.com
 - Let's Encrypt Help: https://community.letsencrypt.org
