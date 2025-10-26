@@ -213,17 +213,17 @@ jobs:
       - name: Run Trivy vulnerability scanner on backend
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'apps/data-service/express'
-          format: 'table'
-          exit-code: '0'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "apps/data-service/express"
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"
 
       - name: Run Trivy vulnerability scanner on frontend
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'apps/user-application/trv1'
-          format: 'table'
-          exit-code: '0'
-          severity: 'CRITICAL,HIGH'
+          scan-type: "fs"
+          scan-ref: "apps/user-application/trv1"
+          format: "table"
+          exit-code: "0"
+          severity: "CRITICAL,HIGH"

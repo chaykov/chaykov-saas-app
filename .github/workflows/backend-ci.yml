@@ -117,6 +117,7 @@ jobs:
           context: .
           file: apps/data-service/express/Dockerfile
           push: false
+          load: true
           tags: backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

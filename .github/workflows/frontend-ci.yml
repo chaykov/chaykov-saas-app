@@ -103,6 +103,7 @@ jobs:
           context: .
           file: apps/user-application/trv1/Dockerfile
           push: false
+          load: true
           tags: frontend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
