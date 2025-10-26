@@ -27,13 +27,13 @@ jobs:
       - name: Create backend .env.local file for drizzle
         run: |
           cat > apps/data-service/express/.env.local << EOF
-          DATABASE_URL=postgresql://postgres:ci_test_password_123@db:5432/saas_db
+          DATABASE_URL=postgresql://postgres:ci_test_password_123@postgres:5432/saas_db
           EOF
 
       - name: Create backend .env file for runtime
         run: |
           cat > apps/data-service/express/.env << EOF
-          DB_HOST=db
+          DB_HOST=postgres
           DB_PORT=5432
           DB_USER=postgres
           DB_PASSWORD=ci_test_password_123
@@ -77,11 +77,11 @@ jobs:
           docker compose logs frontend | tail -50
           echo ""
           echo "📋 Database logs:"
-          docker compose logs db | tail -50
+          docker compose logs postgres | tail -50
 
       - name: Wait for PostgreSQL to be ready
         run: |
-          timeout 60 bash -c 'until docker compose exec -T db pg_isready -U postgres; do sleep 2; done'
+          timeout 60 bash -c 'until docker compose exec -T postgres pg_isready -U postgres; do sleep 2; done'
           echo "✅ PostgreSQL is ready"
 
       - name: Wait for backend to be ready
@@ -101,7 +101,7 @@ jobs:
 
       - name: Test database connection
         run: |
-          docker compose exec -T db psql -U postgres -d saas_db -c "\dt"
+          docker compose exec -T postgres psql -U postgres -d saas_db -c "\dt"
           echo "✅ Database tables created successfully"
 
       - name: Test backend API endpoints
