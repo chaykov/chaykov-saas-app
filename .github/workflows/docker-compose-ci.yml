@@ -108,10 +108,24 @@ jobs:
           docker compose exec -T backend pnpm --filter @saas/data-service drizzle:migrate
           echo "✅ Database migrations completed"
 
+      - name: Restart backend after migrations
+        run: |
+          docker compose restart backend
+          echo "⏳ Waiting for backend to restart..."
+          sleep 10
+          timeout 30 bash -c 'until curl -f http://localhost:3001/health; do sleep 2; done'
+          echo "✅ Backend restarted successfully"
+
       - name: Test database connection
         run: |
           docker compose exec -T postgres psql -U postgres -d chaykov_saas -c "\dt"
           echo "✅ Database tables created successfully"
+
+      - name: Check backend logs after migration
+        if: always()
+        run: |
+          echo "📋 Backend logs (last 30 lines):"
+          docker compose logs backend | tail -30
 
       - name: Test backend API endpoints
         run: |
