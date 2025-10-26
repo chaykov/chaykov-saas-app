@@ -921,7 +921,7 @@ docker compose restart
 git pull && docker compose up -d --build
 
 # Database backup
-docker compose exec db pg_dump -U postgres saas_db > backup.sql
+docker compose exec postgres pg_dump -U postgres chaykov_saas > backup.sql
 
 # Check containers
 docker compose ps
