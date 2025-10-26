@@ -1,0 +1,225 @@
+name: Docker Compose Full Stack CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration-test:
+    name: Full Stack Integration Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Create pnpm-lock.yaml if missing
+        run: |
+          if [ ! -f "pnpm-lock.yaml" ]; then
+            pnpm install --frozen-lockfile=false
+          fi
+
+      - name: Create backend .env file
+        run: |
+          cat > apps/data-service/express/.env << EOF
+          DB_HOST=db
+          DB_PORT=5432
+          DB_USER=postgres
+          DB_PASSWORD=ci_test_password_123
+          DB_NAME=saas_db
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=ci_test_password_123
+          POSTGRES_DB=saas_db
+          PORT=3001
+          NODE_ENV=production
+          CORS_ORIGIN=http://localhost
+          EOF
+
+      - name: Create frontend .env file
+        run: |
+          cat > apps/user-application/trv1/.env << EOF
+          VITE_API_URL=http://localhost:3001/api
+          EOF
+
+      - name: Build and start all services
+        run: |
+          docker compose up -d --build
+          echo "⏳ Waiting for services to be ready..."
+          sleep 30
+
+      - name: Check running containers
+        run: |
+          echo "📦 Running containers:"
+          docker compose ps
+
+          echo ""
+          echo "🔍 Container health status:"
+          docker compose ps --format "table {{.Name}}\t{{.Status}}"
+
+      - name: View service logs
+        if: always()
+        run: |
+          echo "📋 Backend logs:"
+          docker compose logs backend | tail -50
+          echo ""
+          echo "📋 Frontend logs:"
+          docker compose logs frontend | tail -50
+          echo ""
+          echo "📋 Database logs:"
+          docker compose logs db | tail -50
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          timeout 60 bash -c 'until docker compose exec -T db pg_isready -U postgres; do sleep 2; done'
+          echo "✅ PostgreSQL is ready"
+
+      - name: Wait for backend to be ready
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:3001/health; do sleep 2; done'
+          echo "✅ Backend is ready"
+
+      - name: Wait for frontend to be ready
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:80; do sleep 2; done'
+          echo "✅ Frontend is ready"
+
+      - name: Run database migrations
+        run: |
+          docker compose exec -T backend pnpm --filter @saas/data-service drizzle:migrate
+          echo "✅ Database migrations completed"
+
+      - name: Test database connection
+        run: |
+          docker compose exec -T db psql -U postgres -d saas_db -c "\dt"
+          echo "✅ Database tables created successfully"
+
+      - name: Test backend API endpoints
+        run: |
+          echo "Testing health endpoint..."
+          curl -f http://localhost:3001/health || (echo "❌ Health check failed" && exit 1)
+
+          echo "Testing posts endpoint..."
+          curl -f http://localhost:3001/api/posts || (echo "❌ Posts endpoint failed" && exit 1)
+
+          echo "Testing users endpoint..."
+          curl -f http://localhost:3001/api/users || (echo "❌ Users endpoint failed" && exit 1)
+
+          echo "✅ All API endpoints are responding"
+
+      - name: Test frontend is serving content
+        run: |
+          echo "Testing frontend root..."
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80)
+          if [ "$response" = "200" ]; then
+            echo "✅ Frontend is serving content (HTTP $response)"
+          else
+            echo "❌ Frontend returned HTTP $response"
+            exit 1
+          fi
+
+      - name: Test full registration flow
+        run: |
+          echo "Testing user registration..."
+
+          # Register a new user
+          registration_response=$(curl -s -X POST http://localhost:3001/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{
+              "username": "testuser",
+              "email": "test@example.com",
+              "password": "testpassword123",
+              "bio": "Test user bio"
+            }')
+
+          echo "Registration response: $registration_response"
+
+          # Check if registration was successful
+          if echo "$registration_response" | grep -q "User registered successfully"; then
+            echo "✅ User registration successful"
+          else
+            echo "❌ User registration failed"
+            exit 1
+          fi
+
+          # Login with the new user
+          login_response=$(curl -s -X POST http://localhost:3001/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{
+              "email": "test@example.com",
+              "password": "testpassword123"
+            }')
+
+          echo "Login response: $login_response"
+
+          if echo "$login_response" | grep -q "email"; then
+            echo "✅ User login successful"
+          else
+            echo "❌ User login failed"
+            exit 1
+          fi
+
+      - name: Test post creation
+        run: |
+          echo "Testing post creation..."
+
+          post_response=$(curl -s -X POST http://localhost:3001/api/posts \
+            -H "Content-Type: application/json" \
+            -d '{
+              "content": "Test post from CI",
+              "authorId": 1
+            }')
+
+          echo "Post creation response: $post_response"
+
+          if echo "$post_response" | grep -q "content"; then
+            echo "✅ Post creation successful"
+          else
+            echo "❌ Post creation failed"
+            exit 1
+          fi
+
+      - name: Check container resource usage
+        if: always()
+        run: |
+          echo "📊 Container resource usage:"
+          docker stats --no-stream
+
+      - name: Cleanup
+        if: always()
+        run: |
+          echo "🧹 Stopping all services..."
+          docker compose down -v
+          echo "✅ Cleanup completed"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner on backend
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'apps/data-service/express'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy vulnerability scanner on frontend
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'apps/user-application/trv1'
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
