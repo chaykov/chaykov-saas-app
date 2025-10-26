@@ -52,7 +52,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create backend .env file
+      - name: Create backend .env.local file for drizzle
+        working-directory: apps/data-service/express
+        run: |
+          cat > .env.local << EOF
+          DATABASE_URL=postgresql://postgres:test_password@localhost:5432/test_db
+          EOF
+
+      - name: Create backend .env file for runtime
         working-directory: apps/data-service/express
         run: |
           cat > .env << EOF
@@ -72,12 +79,6 @@ jobs:
       - name: Run database migrations
         working-directory: apps/data-service/express
         run: pnpm drizzle:migrate
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_USER: postgres
-          DB_PASSWORD: test_password
-          DB_NAME: test_db
 
       - name: Lint backend code
         working-directory: apps/data-service/express

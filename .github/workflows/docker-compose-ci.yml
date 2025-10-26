@@ -24,7 +24,13 @@ jobs:
             pnpm install --frozen-lockfile=false
           fi
 
-      - name: Create backend .env file
+      - name: Create backend .env.local file for drizzle
+        run: |
+          cat > apps/data-service/express/.env.local << EOF
+          DATABASE_URL=postgresql://postgres:ci_test_password_123@db:5432/saas_db
+          EOF
+
+      - name: Create backend .env file for runtime
         run: |
           cat > apps/data-service/express/.env << EOF
           DB_HOST=db
