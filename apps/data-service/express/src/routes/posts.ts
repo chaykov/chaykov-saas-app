@@ -1,9 +1,9 @@
-import express from "express";
+import express, { Router } from "express";
 import { db } from "../db/client";
 import { posts } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // GET /api/posts - Fetch all posts
 router.get("/", async (req, res) => {
@@ -85,7 +85,7 @@ router.put("/:id", async (req, res) => {
       .update(posts)
       .set({
         content,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(posts.id, postId))
       .returning();

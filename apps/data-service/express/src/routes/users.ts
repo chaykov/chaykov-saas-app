@@ -1,9 +1,9 @@
-import express from "express";
+import express, { Router } from "express";
 import { db } from "../db/client";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // GET /api/users - Get all registered users
 router.get("/", async (_req, res) => {
@@ -13,7 +13,9 @@ router.get("/", async (_req, res) => {
     });
 
     // Remove passwords from all users
-    const usersWithoutPasswords = allUsers.map(({ password: _, ...user }) => user);
+    const usersWithoutPasswords = allUsers.map(
+      ({ password: _, ...user }) => user
+    );
 
     res.json(usersWithoutPasswords);
   } catch (error) {

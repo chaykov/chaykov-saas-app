@@ -1,9 +1,9 @@
-import express from "express";
+import express, { Router } from "express";
 import { db } from "../db/client";
 import { comments } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // POST - /api/comments - Add a new comment
 router.post("/", async (req, res) => {

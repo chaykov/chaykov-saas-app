@@ -1,9 +1,9 @@
-import express from "express";
+import express, { Router } from "express";
 import { db } from "../db/client";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // POST /api/auth/register - Register new user
 router.post("/register", async (req, res) => {
@@ -11,7 +11,9 @@ router.post("/register", async (req, res) => {
     const { username, email, password, bio } = req.body;
 
     if (!username || !email || !password) {
-      return res.status(400).json({ error: "Username, email, and password are required" });
+      return res
+        .status(400)
+        .json({ error: "Username, email, and password are required" });
     }
 
     // Check if user already exists
@@ -20,7 +22,9 @@ router.post("/register", async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({ error: "User with this email already exists" });
+      return res
+        .status(409)
+        .json({ error: "User with this email already exists" });
     }
 
     // In production, you should hash the password
