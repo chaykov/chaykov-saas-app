@@ -24,10 +24,19 @@ jobs:
             pnpm install --frozen-lockfile=false
           fi
 
+      - name: Create root .env file for docker-compose
+        run: |
+          cat > .env << EOF
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=ci_test_password_123
+          POSTGRES_DB=chaykov_saas
+          NODE_ENV=production
+          EOF
+
       - name: Create backend .env.local file for drizzle
         run: |
           cat > apps/data-service/express/.env.local << EOF
-          DATABASE_URL=postgresql://postgres:ci_test_password_123@postgres:5432/saas_db
+          DATABASE_URL=postgresql://postgres:ci_test_password_123@postgres:5432/chaykov_saas
           EOF
 
       - name: Create backend .env file for runtime
@@ -37,10 +46,10 @@ jobs:
           DB_PORT=5432
           DB_USER=postgres
           DB_PASSWORD=ci_test_password_123
-          DB_NAME=saas_db
+          DB_NAME=chaykov_saas
           POSTGRES_USER=postgres
           POSTGRES_PASSWORD=ci_test_password_123
-          POSTGRES_DB=saas_db
+          POSTGRES_DB=chaykov_saas
           PORT=3001
           NODE_ENV=production
           CORS_ORIGIN=http://localhost
@@ -101,7 +110,7 @@ jobs:
 
       - name: Test database connection
         run: |
-          docker compose exec -T postgres psql -U postgres -d saas_db -c "\dt"
+          docker compose exec -T postgres psql -U postgres -d chaykov_saas -c "\dt"
           echo "✅ Database tables created successfully"
 
       - name: Test backend API endpoints
