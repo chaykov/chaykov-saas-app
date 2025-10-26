@@ -1,6 +1,8 @@
+import { apiClient } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@/components/icons";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardIndex,
@@ -9,6 +11,12 @@ export const Route = createFileRoute("/dashboard/")({
 function DashboardIndex() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+
+  const { data: userPosts, isLoading } = useQuery({
+    queryKey: ["posts", "user", user?.id],
+    queryFn: () => apiClient.getUserPosts(user?.id || "0"),
+    enabled: !!user?.id,
+  });
 
   return (
     <div className="space-y-8">
@@ -22,10 +30,12 @@ function DashboardIndex() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard label="My posts" value="7" icon="📝" />
-        <StatCard label="Followers" value="123" icon="👥" />
-        <StatCard label="Following" value="245" icon="⭐" />
+      <div className="max-w-md">
+        <StatCard
+          label="My posts"
+          value={isLoading ? "..." : String(userPosts?.length || 0)}
+          icon="📝"
+        />
       </div>
 
       {/* Quick actions */}
@@ -40,7 +50,10 @@ function DashboardIndex() {
           title="Search users"
           description="Find and follow interesting profiles"
           icon="🔍"
-          onClick={() => navigate({ to: "/dashboard/users" })}
+          onClick={() => {
+            // TODO: Create /dashboard/users route
+            alert("Users page not yet implemented");
+          }}
         />
       </div>
     </div>

@@ -19,7 +19,6 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   likesCount: number;
-  commentsCount: number;
 }
 
 export interface Comment {
@@ -28,4 +27,9 @@ export interface Comment {
   authorId: string;
   postId: string;
   createdAt: string;
+}
+
+export interface PostWithComments extends Post {
+  comments: Comment[];
+  commentsCount: number;
 }

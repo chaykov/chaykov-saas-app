@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Navigate,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "@tanstack/react-router";
 
 import {
   Home,
@@ -10,7 +16,7 @@ import {
   LogOut,
   Menu,
   X,
-} from "lucide-react";
+} from "@/components/icons";
 
 import { useAuthStore } from "@/store/authStore";
 
@@ -20,11 +26,18 @@ export const Route = createFileRoute("/dashboard")({
 
 function DashboardLayout() {
   const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [newNotification, setNewNotification] = useState(true);
+  const location = useLocation();
 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [newNotification] = useState(true);
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" />;
+  }
 
   const handleLogout = () => {
     logout();
@@ -72,7 +85,6 @@ function DashboardLayout() {
           {/* User profile mini */}
           <div className="p-4 border-t border-gray-200 space-y-3">
             <div className="flex items-center gap-3">
-              <div className="text-2xl">{user?.avatar}</div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-sm truncate">
                   {user?.username}

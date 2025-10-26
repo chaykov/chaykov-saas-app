@@ -1,6 +1,8 @@
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/store/authStore";
+import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: LoginPage,
@@ -8,92 +10,163 @@ export const Route = createFileRoute("/")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("jan_kowalski");
-  const [password, setPassword] = useState("password");
+  const login = useAuthStore((state) => state.login);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [isRegister, setIsRegister] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [bio, setBio] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { login, isLoading, error } = useAuthStore();
+  // If already authenticated, redirect to dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" />;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
+
     try {
-      await login(username, password);
-      navigate({ to: "/dashboard", replace: true });
-    } catch (err) {
-      // Error już set w store
+      setIsLoading(true);
+      const response = await apiClient.login(email, password);
+
+      const user = {
+        id: String(response.user.id),
+        username: response.user.username,
+        email: response.user.email,
+      };
+
+      login(user);
+      toast.success("Login successful!");
+      navigate({ to: "/dashboard" });
+    } catch (error: any) {
+      toast.error(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!username || !email || !password) {
+      toast.error("Username, email, and password are required");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await apiClient.register(username, email, password, bio);
+
+      toast.success("Registration successful! You can now login.");
+
+      // Switch to login mode
+      setIsRegister(false);
+      // Pre-fill email for convenience
+      setEmail(email);
+    } catch (error: any) {
+      toast.error(error.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-600 to-blue-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
-        {/* Logo */}
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900">Polytalko</h1>
-          <p className="text-gray-600 mt-2">Mini Social Media</p>
-        </div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          {isRegister ? "Create Account" : "Welcome Back"}
+        </h1>
 
-        {/* Error message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-            {error}
-          </div>
-        )}
+        <form onSubmit={isRegister ? handleRegister : handleLogin} className="space-y-4">
+          {isRegister && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Choose a username"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isLoading}
+              />
+            </div>
+          )}
 
-        {/* Login form */}
-        <form className="space-y-4" onSubmit={handleLogin}>
-          {/* username */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Username
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
             </label>
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="jan_kowalski"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
             />
           </div>
 
-          {/* password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="••••••••"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isLoading}
             />
           </div>
 
+          {isRegister && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Bio (optional)
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell us about yourself..."
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={isLoading}
+              />
+            </div>
+          )}
+
           <button
             type="submit"
+            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
             disabled={isLoading}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition"
           >
-            {isLoading ? "Logging in..." : "Log in"}
+            {isLoading ? "Please wait..." : isRegister ? "Create Account" : "Sign In"}
           </button>
         </form>
 
-        {/* Help text */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-gray-700">
-          <p className="font-semibold mb-2">Mock credentials:</p>
-          <p>
-            Username:{" "}
-            <code className="bg-gray-200 px-2 py-1 rounded">jan_kowalski</code>
-          </p>
-          <p>
-            Password:{" "}
-            <code className="bg-gray-200 px-2 py-1 rounded">password</code>
-          </p>
-          <p className="mt-2 text-xs text-gray-600">
-            Try other users from mock-data
-          </p>
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => {
+              setIsRegister(!isRegister);
+              setPassword("");
+            }}
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+            disabled={isLoading}
+          >
+            {isRegister
+              ? "Already have an account? Sign in"
+              : "Don't have an account? Create one"}
+          </button>
         </div>
       </div>
     </div>

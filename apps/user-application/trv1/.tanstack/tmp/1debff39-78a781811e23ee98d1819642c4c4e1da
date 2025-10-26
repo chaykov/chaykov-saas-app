@@ -1,0 +1,111 @@
+import { createFileRoute } from "@tanstack/react-router"
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tantml:router";
+import { useAuthStore } from "@/store/authStore";
+import { apiClient } from "@/lib/api";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/")({
+  component: LoginPage,
+});
+
+function LoginPage() {
+  const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const [isRegister, setIsRegister] = useState(false);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [bio, setBio] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Email and password are required");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await apiClient.login(email, password);
+
+      const user = {
+        id: String(response.user.id),
+        username: response.user.username,
+        email: response.user.email,
+      };
+
+      login(user);
+      toast.success("Login successful!");
+      navigate({ to: "/dashboard" });
+    } catch (error: any) {
+      toast.error(error.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!username || !email || !password) {
+      toast.error("Username, email, and password are required");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const newUser = await apiClient.register(username, email, password, bio);
+
+      toast.success("Registration successful! You can now login.");
+
+      // Switch to login mode
+      setIsRegister(false);
+      // Pre-fill email for convenience
+      setEmail(email);
+    } catch (error: any) {
+      toast.error(error.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+        <h1 className="text-3xl font-bold mb-6 text-center">Zaloguj się</h1>
+
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Hasło"
+            className="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-semibold"
+          >
+            Zaloguj się
+          </button>
+        </form>
+
+        <p className="text-center mt-4 text-gray-600 text-sm">
+          To jest MOCK login - Zastąp prawdziwą autentykacją!
+        </p>
+      </div>
+    </div>
+  );
+}
