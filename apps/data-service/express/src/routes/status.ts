@@ -1,6 +1,6 @@
-import express from 'express';
+import express, { Router } from 'express';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 const UPTIME_ROBOT_API_KEY = process.env.UPTIME_ROBOT_API_KEY;
 const UPTIME_ROBOT_API_URL = 'https://api.uptimerobot.com/v2/getMonitors';
