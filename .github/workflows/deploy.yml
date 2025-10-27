@@ -15,31 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Debug - Check secrets are set
-        run: |
-          echo "VPS_HOST is set: ${{ secrets.VPS_HOST != '' }}"
-          echo "VPS_USER is set: ${{ secrets.VPS_USER != '' }}"
-          echo "VPS_PORT is set: ${{ secrets.VPS_PORT != '' }}"
-          echo "VPS_SSH_KEY is set: ${{ secrets.VPS_SSH_KEY != '' }}"
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          cat > ~/.ssh/config << EOF
-          Host vps
-            HostName ${{ secrets.VPS_HOST }}
-            User ${{ secrets.VPS_USER }}
-            Port ${{ secrets.VPS_PORT }}
-            IdentityFile ~/.ssh/deploy_key
-            StrictHostKeyChecking no
-            UserKnownHostsFile /dev/null
-          EOF
-
       - name: Deploy to VPS via SSH
-        run: |
-          ssh vps "cd /var/www/chaykov-saas-app && git pull origin main && sudo /var/www/chaykov-saas-app/deploy.sh production"
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.VPS_HOST }}
+          REMOTE_USER: ${{ secrets.VPS_USER }}
+          REMOTE_PORT: ${{ secrets.VPS_PORT }}
+          SCRIPT_BEFORE: |
+            cd /var/www/chaykov-saas-app
+            git pull origin main
+          SCRIPT_AFTER: |
+            sudo /var/www/chaykov-saas-app/deploy.sh production
 
       - name: Notify deployment success
         if: success()
