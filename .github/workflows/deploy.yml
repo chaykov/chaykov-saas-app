@@ -15,6 +15,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Debug - Check secrets are set
+        run: |
+          echo "VPS_HOST is set: ${{ secrets.VPS_HOST != '' }}"
+          echo "VPS_USER is set: ${{ secrets.VPS_USER != '' }}"
+          echo "VPS_PORT is set: ${{ secrets.VPS_PORT != '' }}"
+          echo "VPS_SSH_KEY is set: ${{ secrets.VPS_SSH_KEY != '' }}"
+
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
