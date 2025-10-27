@@ -136,6 +136,11 @@ services:
       - "${FRONTEND_HOST_PORT:-80}:80"
     networks:
       - polytalko-prod-network
+    # Tmpfs mounts for nginx cache directories (required for read-only container)
+    tmpfs:
+      - /var/cache/nginx:uid=101,gid=101
+      - /var/run:uid=101,gid=101
+      - /tmp
     healthcheck:
       test:
         [

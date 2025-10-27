@@ -145,13 +145,13 @@ chaykov-saas-app/
 
 ```bash
 # Build and start all services
-docker-compose -f docker-compose.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build
 
 # Check service health
-docker-compose -f docker-compose.yml ps
+docker compose -f docker-compose.prod.yml ps
 
 # View logs
-docker-compose -f docker-compose.yml logs -f backend
+docker compose -f docker-compose.prod.yml logs -f backend
 ```
 
 ### Step 3: Database Migration
@@ -316,7 +316,7 @@ docker-compose -f docker-compose.dev.yml logs backend
 lsof -i :3001
 
 # Force recreate containers
-docker-compose -f docker-compose.dev.yml up -d --force-recreate
+docker compose -f docker-compose.dev.yml up -d --force-recreate
 ```
 
 ### Issue: Database connection failed
