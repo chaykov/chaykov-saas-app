@@ -13,6 +13,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardUsersRouteImport } from './routes/dashboard.users'
+import { Route as DashboardStatusRouteImport } from './routes/dashboard.status'
 import { Route as DashboardPostsRouteImport } from './routes/dashboard.posts'
 import { Route as DashboardUsersIndexRouteImport } from './routes/dashboard.users.index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard.settings.index'
@@ -41,6 +42,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
 const DashboardUsersRoute = DashboardUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardStatusRoute = DashboardStatusRouteImport.update({
+  id: '/status',
+  path: '/status',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardPostsRoute = DashboardPostsRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/posts': typeof DashboardPostsRouteWithChildren
+  '/dashboard/status': typeof DashboardStatusRoute
   '/dashboard/users': typeof DashboardUsersRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/posts/$postId': typeof DashboardPostsPostIdRouteWithChildren
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard/status': typeof DashboardStatusRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/posts/create': typeof DashboardPostsCreateRoute
   '/dashboard/posts': typeof DashboardPostsIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/posts': typeof DashboardPostsRouteWithChildren
+  '/dashboard/status': typeof DashboardStatusRoute
   '/dashboard/users': typeof DashboardUsersRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/posts/$postId': typeof DashboardPostsPostIdRouteWithChildren
@@ -138,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/posts'
+    | '/dashboard/status'
     | '/dashboard/users'
     | '/dashboard/'
     | '/dashboard/posts/$postId'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard/status'
     | '/dashboard'
     | '/dashboard/posts/create'
     | '/dashboard/posts'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/posts'
+    | '/dashboard/status'
     | '/dashboard/users'
     | '/dashboard/'
     | '/dashboard/posts/$postId'
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/dashboard/users'
       preLoaderRoute: typeof DashboardUsersRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/status': {
+      id: '/dashboard/status'
+      path: '/status'
+      fullPath: '/dashboard/status'
+      preLoaderRoute: typeof DashboardStatusRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/posts': {
@@ -330,6 +349,7 @@ const DashboardUsersRouteWithChildren = DashboardUsersRoute._addFileChildren(
 
 interface DashboardRouteChildren {
   DashboardPostsRoute: typeof DashboardPostsRouteWithChildren
+  DashboardStatusRoute: typeof DashboardStatusRoute
   DashboardUsersRoute: typeof DashboardUsersRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
@@ -337,6 +357,7 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardPostsRoute: DashboardPostsRouteWithChildren,
+  DashboardStatusRoute: DashboardStatusRoute,
   DashboardUsersRoute: DashboardUsersRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,

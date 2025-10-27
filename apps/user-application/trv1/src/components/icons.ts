@@ -14,4 +14,5 @@ export {
   ArrowRight,
   Calendar,
   Mail,
+  Activity,
 } from "lucide-react";

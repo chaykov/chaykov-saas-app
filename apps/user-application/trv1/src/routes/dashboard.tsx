@@ -16,6 +16,7 @@ import {
   LogOut,
   Menu,
   X,
+  Activity,
 } from "@/components/icons";
 
 import { useAuthStore } from "@/store/authStore";
@@ -48,6 +49,7 @@ function DashboardLayout() {
     { label: "Dashboard", icon: Home, path: "/dashboard" },
     { label: "Posts", icon: MessageSquare, path: "/dashboard/posts" },
     { label: "Users", icon: Users, path: "/dashboard/users" },
+    { label: "Status", icon: Activity, path: "/dashboard/status" },
     { label: "Settings", icon: Settings, path: "/dashboard/settings" },
   ];
 

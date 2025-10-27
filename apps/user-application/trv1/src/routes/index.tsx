@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { apiClient } from "@/lib/api";
 import { toast } from "sonner";
+import { StatusBadge } from "@/components/StatusBadge";
 
 export const Route = createFileRoute("/")({
   component: LoginPage,
@@ -167,6 +168,11 @@ function LoginPage() {
               ? "Already have an account? Sign in"
               : "Don't have an account? Create one"}
           </button>
+        </div>
+
+        {/* System Status Badge */}
+        <div className="mt-6">
+          <StatusBadge />
         </div>
       </div>
     </div>
