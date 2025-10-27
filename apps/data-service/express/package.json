@@ -9,6 +9,7 @@
     "seed": "ts-node src/seed.ts",
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:migrate": "drizzle-kit migrate",
+    "drizzle:push": "drizzle-kit push",
     "drizzle:studio": "drizzle-kit studio"
   },
   "license": "ISC",
