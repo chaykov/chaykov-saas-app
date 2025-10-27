@@ -36,11 +36,12 @@ jobs:
           VPS_PORT: ${{ secrets.VPS_PORT }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p $VPS_PORT $VPS_USER@$VPS_HOST << 'EOF'
-            cd /var/www/chaykov-saas-app
-            git pull origin main
-            sudo /var/www/chaykov-saas-app/deploy.sh production
-          EOF
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -p ${VPS_PORT} \
+            ${VPS_USER}@${VPS_HOST} \
+            "cd /var/www/chaykov-saas-app && git pull origin main && sudo /var/www/chaykov-saas-app/deploy.sh production"
 
       - name: Notify deployment success
         if: success()
