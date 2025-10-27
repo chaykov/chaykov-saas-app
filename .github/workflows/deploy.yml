@@ -23,25 +23,23 @@ jobs:
           echo "VPS_SSH_KEY is set: ${{ secrets.VPS_SSH_KEY != '' }}"
 
       - name: Setup SSH
-        env:
-          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          cat > ~/.ssh/config << EOF
+          Host vps
+            HostName ${{ secrets.VPS_HOST }}
+            User ${{ secrets.VPS_USER }}
+            Port ${{ secrets.VPS_PORT }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          EOF
 
       - name: Deploy to VPS via SSH
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_PORT }}
-          VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          ssh -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -p ${VPS_PORT} \
-            ${VPS_USER}@${VPS_HOST} \
-            "cd /var/www/chaykov-saas-app && git pull origin main && sudo /var/www/chaykov-saas-app/deploy.sh production"
+          ssh vps "cd /var/www/chaykov-saas-app && git pull origin main && sudo /var/www/chaykov-saas-app/deploy.sh production"
 
       - name: Notify deployment success
         if: success()
