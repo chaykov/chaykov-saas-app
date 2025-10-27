@@ -10,10 +10,18 @@ router.get("/", async (req, res) => {
   try {
     const allPosts = await db.query.posts.findMany({
       with: {
-        author: true,
+        author: {
+          columns: {
+            password: false,
+          },
+        },
         comments: {
           with: {
-            author: true,
+            author: {
+              columns: {
+                password: false,
+              },
+            },
           },
         },
       },
@@ -34,10 +42,18 @@ router.get("/:id", async (req, res) => {
     const post = await db.query.posts.findFirst({
       where: eq(posts.id, postId),
       with: {
-        author: true,
+        author: {
+          columns: {
+            password: false,
+          },
+        },
         comments: {
           with: {
-            author: true,
+            author: {
+              columns: {
+                password: false,
+              },
+            },
           },
         },
       },

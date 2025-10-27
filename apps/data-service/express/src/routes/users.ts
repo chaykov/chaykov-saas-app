@@ -9,15 +9,13 @@ const router: Router = express.Router();
 router.get("/", async (_req, res) => {
   try {
     const allUsers = await db.query.users.findMany({
+      columns: {
+        password: false,
+      },
       orderBy: (users, { desc }) => [desc(users.createdAt)],
     });
 
-    // Remove passwords from all users
-    const usersWithoutPasswords = allUsers.map(
-      ({ password: _, ...user }) => user
-    );
-
-    res.json(usersWithoutPasswords);
+    res.json(allUsers);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch users" });
@@ -29,6 +27,9 @@ router.get("/:id", async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
     const user = await db.query.users.findFirst({
+      columns: {
+        password: false,
+      },
       where: eq(users.id, userId),
       with: {
         posts: {
@@ -44,10 +45,7 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Don't send password to client
-    const { password: _, ...userWithoutPassword } = user;
-
-    res.json(userWithoutPassword);
+    res.json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch user with posts" });
@@ -65,20 +63,24 @@ router.put("/:id", async (req, res) => {
     if (email) updateData.email = email;
     if (bio !== undefined) updateData.bio = bio;
 
-    const updatedUser = await db
+    await db
       .update(users)
       .set(updateData)
-      .where(eq(users.id, userId))
-      .returning();
+      .where(eq(users.id, userId));
 
-    if (updatedUser.length === 0) {
+    // Fetch the updated user without password
+    const updatedUser = await db.query.users.findFirst({
+      columns: {
+        password: false,
+      },
+      where: eq(users.id, userId),
+    });
+
+    if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Don't send password to client
-    const { password: _, ...userWithoutPassword } = updatedUser[0];
-
-    res.json(userWithoutPassword);
+    res.json(updatedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to update user profile" });

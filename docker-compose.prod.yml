@@ -1,0 +1,212 @@
+# ============================================
+# DOCKER COMPOSE - PRODUCTION
+# ============================================
+# For production deployment
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+#
+# This configuration:
+# - Optimized builds with multi-stage Dockerfiles
+# - No source code volumes (baked into images)
+# - Minimal port exposure
+# - Production-ready security settings
+# - Restart policies for high availability
+# - Resource limits and health checks
+# ============================================
+
+version: "3.9"
+
+services:
+  # ==========================================
+  # PostgreSQL Database (Production)
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: polytalko-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Performance tuning
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    ports:
+      # Only expose internally, not to host (comment out if using external DB)
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      # Persistent production data
+      - postgres_prod_data:/var/lib/postgresql/data
+      # Optional: Init scripts
+      - ./apps/data-service/express/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - polytalko-prod-network
+    # Resource limits (adjust based on your server)
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # ==========================================
+  # Backend API (Express) - Production Build
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: apps/data-service/express/Dockerfile
+      target: production
+      args:
+        NODE_ENV: production
+    image: polytalko-backend:latest
+    container_name: polytalko-backend-prod
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: ${DATABASE_URL}
+      API_KEY: ${API_KEY}
+      FRONTEND_URL: ${FRONTEND_URL}
+    ports:
+      - "${BACKEND_HOST_PORT:-3001}:3001"
+    networks:
+      - polytalko-prod-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3001/health'', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"',
+        ]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 90s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================
+  # Frontend (React + Vite) - Production Build
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/user-application/trv1/Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_API_KEY: ${VITE_API_KEY}
+    image: polytalko-frontend:latest
+    container_name: polytalko-frontend-prod
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_HOST_PORT:-80}:80"
+    networks:
+      - polytalko-prod-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1",
+        ]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================
+  # Optional: Nginx Reverse Proxy (Uncomment if needed)
+  # ==========================================
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: polytalko-nginx-prod
+  #   restart: always
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./config/nginx/ssl:/etc/nginx/ssl:ro
+  #   networks:
+  #     - polytalko-prod-network
+  #   healthcheck:
+  #     test: ["CMD", "nginx", "-t"]
+  #     interval: 60s
+  #     timeout: 10s
+  #     retries: 3
+
+# ==========================================
+# NETWORKS
+# ==========================================
+networks:
+  polytalko-prod-network:
+    name: polytalko-prod-network
+    driver: bridge
+
+# ==========================================
+# VOLUMES
+# ==========================================
+volumes:
+  postgres_prod_data:
+    name: polytalko-postgres-prod-data
+    driver: local
+    # Optional: Use external volume for backups
+    # driver_opts:
+    #   type: none
+    #   device: /mnt/data/postgres
+    #   o: bind

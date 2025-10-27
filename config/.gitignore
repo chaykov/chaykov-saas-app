@@ -1,0 +1,14 @@
+# Ignore all environment files with actual credentials
+*.env
+.env.*
+!.env.template
+
+# But keep the template file
+!env/.env.template
+
+# Ignore any secret or credential files
+*.key
+*.pem
+*.crt
+secrets/
+ssl/

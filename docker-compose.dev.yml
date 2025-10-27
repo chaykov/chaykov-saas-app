@@ -1,0 +1,115 @@
+# ============================================
+# DOCKER COMPOSE - DEVELOPMENT
+# ============================================
+# For local development with hot-reload
+# Usage: docker-compose -f docker-compose.dev.yml up
+#
+# This configuration:
+# - Mounts source code as volumes for hot-reload
+# - Exposes all ports for debugging
+# - Uses development environment variables
+# - Includes dev tools and logging
+# ============================================
+
+version: "3.9"
+
+services:
+  # ==========================================
+  # PostgreSQL Database (Development)
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: polytalko-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-polytalko_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password}
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      # Persistent data storage
+      - postgres_dev_data:/var/lib/postgresql/data
+      # Optional: Initialize database with seed data
+      - ./apps/data-service/express/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-polytalko_dev}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - polytalko-dev-network
+
+  # ==========================================
+  # Backend API (Express) - Development Mode
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: apps/data-service/express/Dockerfile
+      target: production # Use production build for simplicity
+    container_name: polytalko-backend-dev
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres_dev_password}@postgres:5432/${POSTGRES_DB:-polytalko_dev}
+      API_KEY: ${API_KEY:-dev-api-key-12345}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "${BACKEND_HOST_PORT:-3001}:3001"
+    networks:
+      - polytalko-dev-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'node -e "require(''http'').get(''http://localhost:3001/health'', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ==========================================
+  # Frontend (React + Vite) - Development Mode
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/user-application/trv1/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+        VITE_API_KEY: ${VITE_API_KEY:-dev-api-key-12345}
+    container_name: polytalko-frontend-dev
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_HOST_PORT:-3000}:80"
+    networks:
+      - polytalko-dev-network
+
+# ==========================================
+# NETWORKS
+# ==========================================
+networks:
+  polytalko-dev-network:
+    name: polytalko-dev-network
+    driver: bridge
+
+# ==========================================
+# VOLUMES
+# ==========================================
+volumes:
+  postgres_dev_data:
+    name: polytalko-postgres-dev-data
+    driver: local

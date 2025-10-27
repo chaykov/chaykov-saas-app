@@ -41,6 +41,8 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${BACKEND_PORT:-3001}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-chaykov_saas}
+      API_KEY: ${API_KEY}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     ports:
       - "${BACKEND_PORT:-3001}:3001"
     networks:
@@ -63,6 +65,7 @@ services:
       dockerfile: apps/user-application/trv1/Dockerfile
       args:
         VITE_API_URL: /api
+        VITE_API_KEY: ${VITE_API_KEY}
     container_name: chaykov-saas-frontend
     restart: unless-stopped
     depends_on:

@@ -24,9 +24,11 @@ COPY apps/user-application/trv1 ./apps/user-application/trv1
 # Build the application
 WORKDIR /app/apps/user-application/trv1
 
-# Build argument for API URL
+# Build arguments for environment variables
 ARG VITE_API_URL
+ARG VITE_API_KEY
 ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_API_KEY=${VITE_API_KEY}
 
 # Set NODE_ENV to production for proper React build
 ENV NODE_ENV=production
