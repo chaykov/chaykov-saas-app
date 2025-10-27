@@ -29,9 +29,12 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       # Performance tuning
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
-    ports:
-      # Only expose internally, not to host (comment out if using external DB)
-      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    # SECURITY: Do not expose database port externally in production
+    # If you need to access the database from outside, use SSH tunnel:
+    # ssh -L 5432:localhost:5432 user@your-vps-ip
+    # Then connect to localhost:5432 from your machine
+    # ports:
+    #   - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
     volumes:
       # Persistent production data
       - postgres_prod_data:/var/lib/postgresql/data

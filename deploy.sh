@@ -9,8 +9,16 @@ set -e
 ENVIRONMENT=${1:-local}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Set docker-compose file based on environment
+if [ "$ENVIRONMENT" = "production" ]; then
+    COMPOSE_FILE="docker-compose.prod.yml"
+else
+    COMPOSE_FILE="docker-compose.dev.yml"
+fi
+
 echo "🚀 Deploying Chaykov SaaS Application"
 echo "📋 Environment: $ENVIRONMENT"
+echo "📄 Using: $COMPOSE_FILE"
 echo ""
 
 cd "$SCRIPT_DIR"
@@ -53,11 +61,11 @@ fi
 
 # Stop existing containers
 echo "🛑 Stopping existing containers..."
-docker-compose down || true
+docker-compose -f $COMPOSE_FILE down || true
 
 # Build and start containers
 echo "🔨 Building and starting containers..."
-docker-compose up --build -d
+docker-compose -f $COMPOSE_FILE up --build -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be healthy..."
@@ -69,13 +77,13 @@ echo "🏥 Checking service health..."
 # Wait for postgres
 echo "  - PostgreSQL..."
 for i in {1..30}; do
-    if docker-compose exec -T postgres pg_isready -U ${POSTGRES_USER:-postgres} > /dev/null 2>&1; then
+    if docker-compose -f $COMPOSE_FILE exec -T postgres pg_isready -U ${POSTGRES_USER:-postgres} > /dev/null 2>&1; then
         echo "    ✅ PostgreSQL is ready"
         break
     fi
     if [ $i -eq 30 ]; then
         echo "    ❌ PostgreSQL failed to start"
-        docker-compose logs postgres
+        docker-compose -f $COMPOSE_FILE logs postgres
         exit 1
     fi
     sleep 2
@@ -84,13 +92,13 @@ done
 # Wait for backend
 echo "  - Backend API..."
 for i in {1..30}; do
-    if curl -f http://localhost:${BACKEND_PORT:-3001}/health > /dev/null 2>&1; then
+    if curl -f http://localhost:${BACKEND_HOST_PORT:-3001}/health > /dev/null 2>&1; then
         echo "    ✅ Backend is ready"
         break
     fi
     if [ $i -eq 30 ]; then
         echo "    ❌ Backend failed to start"
-        docker-compose logs backend
+        docker-compose -f $COMPOSE_FILE logs backend
         exit 1
     fi
     sleep 2
@@ -99,13 +107,13 @@ done
 # Wait for frontend
 echo "  - Frontend..."
 for i in {1..30}; do
-    if curl -f http://localhost:${FRONTEND_PORT:-80}/health > /dev/null 2>&1; then
+    if curl -f http://localhost:${FRONTEND_HOST_PORT:-80}/health > /dev/null 2>&1; then
         echo "    ✅ Frontend is ready"
         break
     fi
     if [ $i -eq 30 ]; then
         echo "    ❌ Frontend failed to start"
-        docker-compose logs frontend
+        docker-compose -f $COMPOSE_FILE logs frontend
         exit 1
     fi
     sleep 2
@@ -114,21 +122,21 @@ done
 # Display service status
 echo ""
 echo "📊 Service Status:"
-docker-compose ps
+docker-compose -f $COMPOSE_FILE ps
 
 # Display access URLs
 echo ""
 echo "✨ Deployment successful!"
 echo ""
 echo "🌐 Access your application:"
-echo "   Frontend:  http://localhost:${FRONTEND_PORT:-80}"
-echo "   Backend:   http://localhost:${BACKEND_PORT:-3001}"
-echo "   API Health: http://localhost:${BACKEND_PORT:-3001}/health"
+echo "   Frontend:  http://localhost:${FRONTEND_HOST_PORT:-80}"
+echo "   Backend:   http://localhost:${BACKEND_HOST_PORT:-3001}"
+echo "   API Health: http://localhost:${BACKEND_HOST_PORT:-3001}/health"
 echo ""
 echo "📝 Useful commands:"
-echo "   View logs:        docker-compose logs -f"
-echo "   Stop services:    docker-compose down"
-echo "   Restart services: docker-compose restart"
+echo "   View logs:        docker-compose -f $COMPOSE_FILE logs -f"
+echo "   Stop services:    docker-compose -f $COMPOSE_FILE down"
+echo "   Restart services: docker-compose -f $COMPOSE_FILE restart"
 echo ""
 
 if [ "$ENVIRONMENT" = "production" ]; then
