@@ -16,7 +16,9 @@ const PORT = process.env.PORT || 3001;
 // Configure CORS to only allow requests from frontend
 const allowedOrigins = [
   "http://localhost:3000", // Development
+  "http://localhost:5173", // Vite dev server
   process.env.FRONTEND_URL, // Production (if set)
+  process.env.FRONTEND_URL?.replace("://", "://www."), // www version
 ].filter(Boolean);
 
 app.use(
