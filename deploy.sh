@@ -61,11 +61,11 @@ fi
 
 # Stop existing containers
 echo "🛑 Stopping existing containers..."
-docker-compose -f $COMPOSE_FILE down || true
+docker compose -f $COMPOSE_FILE down || true
 
 # Build and start containers
 echo "🔨 Building and starting containers..."
-docker-compose -f $COMPOSE_FILE up --build -d
+docker compose -f $COMPOSE_FILE up --build -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be healthy..."
@@ -77,13 +77,13 @@ echo "🏥 Checking service health..."
 # Wait for postgres
 echo "  - PostgreSQL..."
 for i in {1..30}; do
-    if docker-compose -f $COMPOSE_FILE exec -T postgres pg_isready -U ${POSTGRES_USER:-postgres} > /dev/null 2>&1; then
+    if docker compose -f $COMPOSE_FILE exec -T postgres pg_isready -U ${POSTGRES_USER:-postgres} > /dev/null 2>&1; then
         echo "    ✅ PostgreSQL is ready"
         break
     fi
     if [ $i -eq 30 ]; then
         echo "    ❌ PostgreSQL failed to start"
-        docker-compose -f $COMPOSE_FILE logs postgres
+        docker compose -f $COMPOSE_FILE logs postgres
         exit 1
     fi
     sleep 2
@@ -98,7 +98,7 @@ for i in {1..30}; do
     fi
     if [ $i -eq 30 ]; then
         echo "    ❌ Backend failed to start"
-        docker-compose -f $COMPOSE_FILE logs backend
+        docker compose -f $COMPOSE_FILE logs backend
         exit 1
     fi
     sleep 2
@@ -113,7 +113,7 @@ for i in {1..30}; do
     fi
     if [ $i -eq 30 ]; then
         echo "    ❌ Frontend failed to start"
-        docker-compose -f $COMPOSE_FILE logs frontend
+        docker compose -f $COMPOSE_FILE logs frontend
         exit 1
     fi
     sleep 2
@@ -122,7 +122,7 @@ done
 # Display service status
 echo ""
 echo "📊 Service Status:"
-docker-compose -f $COMPOSE_FILE ps
+docker compose -f $COMPOSE_FILE ps
 
 # Display access URLs
 echo ""
@@ -134,9 +134,9 @@ echo "   Backend:   http://localhost:${BACKEND_HOST_PORT:-3001}"
 echo "   API Health: http://localhost:${BACKEND_HOST_PORT:-3001}/health"
 echo ""
 echo "📝 Useful commands:"
-echo "   View logs:        docker-compose -f $COMPOSE_FILE logs -f"
-echo "   Stop services:    docker-compose -f $COMPOSE_FILE down"
-echo "   Restart services: docker-compose -f $COMPOSE_FILE restart"
+echo "   View logs:        docker compose -f $COMPOSE_FILE logs -f"
+echo "   Stop services:    docker compose -f $COMPOSE_FILE down"
+echo "   Restart services: docker compose -f $COMPOSE_FILE restart"
 echo ""
 
 if [ "$ENVIRONMENT" = "production" ]; then
